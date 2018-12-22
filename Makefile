@@ -1,3 +1,4 @@
+# must be equal with 'KernelEntryPointPhyAddr' in load.inc
 ENTRYPOINT  = 0x30400
 ENTRYOFFSET = 0X400
 
@@ -15,7 +16,7 @@ DASMFLAGS = -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 #Program
 ORANGESBOOT = boot/boot.bin boot/loader.bin
 ORANGESKERNEL= kernel.bin
-OBJS        = kernel/kernel.o kernel/start.o kernel/i8259.o kernel/global.o kernel/protect.o lib/klib.o lib/kliba.o lib/string.o
+OBJS        = kernel/kernel.o kernel/start.o kernel/main.o kernel/i8259.o kernel/global.o kernel/protect.o lib/klib.o lib/kliba.o lib/string.o
 DASMOUTPUT  = kernel.bin.asm
 
 #Phony Targets
@@ -60,6 +61,9 @@ kernel/kernel.o: kernel/kernel.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
 
 kernel/start.o : kernel/start.c include/type.h include/const.h include/protect.h include/proto.h include/string.h include/global.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/main.o: kernel/main.c include/type.h include/const.h include/protect.h include/string.h include/proc.h include/proto.h include/global.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 kernel/i8259.o: kernel/i8259.c /usr/include/stdc-predef.h include/type.h \

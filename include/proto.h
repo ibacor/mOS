@@ -5,3 +5,16 @@ PUBLIC void disp_str(char * info);
 PUBLIC void disp_color_str(char * info, int color);
 PUBLIC void init_prot();
 PUBLIC void init_8259A();
+
+/* protect.c */
+PUBLIC void init_prot();
+PUBLIC u32  seg2phys(u16 seg);
+
+/*klib.c*/
+PUBLIC void delay(int time);
+
+/*kernel.asm*/
+void restart();
+
+/*main.c*/
+void TestA();
