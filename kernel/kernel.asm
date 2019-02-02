@@ -1,15 +1,20 @@
-SELECTOR_KERNEL_CS  equ 8
+%include "sconst.inc"
+;SELECTOR_KERNEL_CS  equ 8
 
 ; import function
 extern cstart
+extern kernel_main
 extern exception_handler
 extern spurious_irq
 
 ; import global variable
 extern gdt_ptr
 extern idt_ptr
+extern p_proc_ready
+extern tss
 extern disp_pos
 
+bits 32
 
 [SECTION .bss]
 StackSpace  resb    2*1024
@@ -18,6 +23,8 @@ StackTop    ;栈顶
 ;代码在此
 [section .text]
 global _start
+
+global restart
 
 global divide_error
 global single_step_exception
@@ -70,8 +77,13 @@ csinit:
     ;ud2
 	;jmp 0x40:0
 
-	sti	;set IF
-    hlt
+	xor eax, eax
+	mov ax, SELECTOR_TSS
+	ltr ax
+
+	;sti	;set IF
+    jmp kernel_main
+	;hlt
 
 ; 中断和异常 -- 硬件中断
 ;---------------------------------------------
@@ -85,7 +97,7 @@ csinit:
 
 ALIGN	16
 hwint00:		;Interrupt routine for irq 0(the clock)
-		hwint_master	0
+		iretd
 
 ALIGN	16
 hwint01:		;Interrupt routine for irq 1(keyboard)
@@ -221,3 +233,22 @@ exception:
 	call	exception_handler
 	add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
 	hlt
+
+;=============================================
+;restart
+;=============================================
+restart:
+	mov esp, [p_proc_ready]
+	lldt [esp + P_LDT_SEL]
+	lea eax, [esp + P_STACKTOP]
+	mov dword [tss + TSS3_S_SP0], eax
+
+	pop gs
+	pop fs
+	pop es
+	pop ds
+	popad
+
+	add esp, 4
+
+	iretd

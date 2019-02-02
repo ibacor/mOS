@@ -59,22 +59,25 @@ $(ORANGESKERNEL) : $(OBJS)
 kernel/kernel.o: kernel/kernel.asm
 	$(ASM) $(ASMKFLAGS) -o $@ $<
 
-kernel/start.o : kernel/start.c include/type.h include/const.h include/protect.h include/proto.h include/string.h include/global.h
+kernel/start.o : kernel/start.c include/type.h include/const.h include/protect.h include/proc.h include/proto.h include/string.h include/global.h
 	$(CC) $(CFLAGS) -o $@ $<
 
-kernel/i8259.o: kernel/i8259.c /usr/include/stdc-predef.h include/type.h \
+kernel/main.o: kernel/main.c include/type.h include/const.h include/protect.h include/string.h include/proc.h include/proto.h include/global.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+kernel/i8259.o: kernel/i8259.c include/type.h \
  include/const.h include/protect.h include/proto.h
 	$(CC) $(CFLAGS) -o $@ $<
 
-kernel/global.o: kernel/global.c /usr/include/stdc-predef.h include/type.h \
+kernel/global.o: kernel/global.c include/type.h include/proc.h \
  include/const.h include/protect.h include/proto.h include/global.h
 	$(CC) $(CFLAGS) -o $@ $<
 
-kernel/protect.o: kernel/protect.c /usr/include/stdc-predef.h include/type.h \
+kernel/protect.o: kernel/protect.c include/type.h include/proc.h \
  include/const.h include/protect.h include/global.h include/proto.h
 	$(CC) $(CFLAGS) -fno-stack-protector -o $@ $<
 
-lib/klib.o: lib/klib.c /usr/include/stdc-predef.h include/type.h \
+lib/klib.o: lib/klib.c include/type.h include/proc.h \
  include/const.h include/protect.h include/proto.h include/string.h \
   include/global.h
 	$(CC) $(CFLAGS) -fno-stack-protector -o $@ $<
